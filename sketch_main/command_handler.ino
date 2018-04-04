@@ -168,16 +168,16 @@ boolean boundsCheck(float x, float y, float z){
   else{
   #if DO_BOUNDS_CHECK
   
-    float cur_x_pos = EEPROMReadlong(X_ADDR);
+    long cur_x_pos = EEPROMReadlong(X_ADDR);
     delay(10);
-    float cur_y_pos = EEPROMReadlong(Y_ADDR);
+    long cur_y_pos = EEPROMReadlong(Y_ADDR);
     delay(10);
-    float cur_z_pos = EEPROMReadlong(Z_ADDR);
+    long cur_z_pos = EEPROMReadlong(Z_ADDR);
     delay(10);
   
-    float proposedPosX = cur_x_pos + (x*STEPS_PER_MM);
-    float proposedPosY = cur_y_pos + (y*STEPS_PER_MM);
-    float proposedPosZ = cur_z_pos + (z*STEPS_PER_MM);  
+    long proposedPosX = cur_x_pos + (x*STEPS_PER_MM);
+    long proposedPosY = cur_y_pos + (y*STEPS_PER_MM);
+    long proposedPosZ = cur_z_pos + (z*STEPS_PER_MM);  
       
     if(proposedPosX < X_BOUND_MIN || proposedPosX > X_BOUND_MAX){
       retStat = false;
@@ -420,6 +420,7 @@ void returnToZero(){
     Timer1.detachInterrupt();
     digitalWrite(Y_DIR,LOW);
     digitalWrite(Y_ENA,LOW);
+    delay(5);
     for(long i = 0; i < curYpos; i++){
       digitalWrite(STEP_PWM_PIN,HIGH);
       delayMicroseconds(120);
@@ -427,7 +428,7 @@ void returnToZero(){
       delayMicroseconds(120);
     }
     digitalWrite(Y_ENA,HIGH);
-    EEPROMWritelong(Y_ADDR,y_pos - curYpos);
+    EEPROMWritelong(Y_ADDR,0);
     delay(5);
     Timer1.initialize(240); // set a timer of length 100000 microseconds (or 0.1 sec - or 10Hz => the led will blink 5 times, 5 cycles of on-and-off, per second)
     Timer1.attachInterrupt( timerIsr ); // attach the service routine here
@@ -586,7 +587,7 @@ void timerIsr()
       EEPROMWritelong(X_ADDR,x_pos + (x_counter*x_dirVec));
       x_counter = 0;      
     }
-    if(y_dirVec != 0 && y_started){
+    if(y_dirVec != 0 && y_started && !stopTriggered){
       delay(5);
       EEPROMWritelong(Y_ADDR,y_pos + (y_counter*y_dirVec));
       y_counter = 0;
