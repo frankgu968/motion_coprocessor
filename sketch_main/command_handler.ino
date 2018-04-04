@@ -292,13 +292,16 @@ char handleSTP(){
 
 char handleRST(){
   TRACEN("handle RST");
+  int eventResult = 120;
   if(!stopTriggered){
     stopTriggered = true;
     if(RETURN_TO_ZERO){
       returnToZero();
-    }      
-  }    
-  int eventResult = 120;
+    } 
+    eventResult = 120;     
+  } else {
+    eventResult = 150; 
+  } 
   return eventResult;
 }
 
@@ -355,9 +358,13 @@ byte engUntilThreshold(){
         } else {
           //break or error - there is no force profile
           TRACEN("force outside of profile");          
-          handleSTP();
+          //handleSTP();
+          digitalWrite(Y_ENA,HIGH);
+          enabled_Y = false;
+          EEPROMWritelong(Y_ADDR,y_pos + (y_counter*y_dirVec));
           //saveCurPos();
           threshReached = true;
+          engageEnabled = false;
           Serial.print("{CPT}");
           Serial.print("\n");
           retVal = 100;        
@@ -584,7 +591,7 @@ void timerIsr()
   //if all motors are done, then save state and reset enables
   if(move_z_Done && move_y_Done && move_x_Done && (x_started || y_started || z_started)){
     
-    if(x_dirVec !=0 && x_started){
+    if(x_dirVec !=0 && x_started && !engageEnabled){
       delay(5);
       EEPROMWritelong(X_ADDR,x_pos + (x_counter*x_dirVec));
       x_counter = 0;      
@@ -594,7 +601,7 @@ void timerIsr()
       EEPROMWritelong(Y_ADDR,y_pos + (y_counter*y_dirVec));
       y_counter = 0;
     }
-    if(z_dirVec != 0 && z_started){
+    if(z_dirVec != 0 && z_started && !engageEnabled){
       delay(5);
       EEPROMWritelong(Z_ADDR,z_pos + (z_counter*z_dirVec));
       z_counter = 0;
