@@ -395,18 +395,14 @@ char handleDNG(){
 
 void returnToZero(){
   long curXpos, curYpos, curZpos; 
- 
+  boolean wasEngageEnabled = engageEnabled;
   disableAllMotors(); 
   saveCurPos();
 
   delay(5);  
   curXpos = EEPROMReadlong(X_ADDR);
-  delay(5);
-  if(engageEnabled){
-    curYpos = y_pos;
-  } else {
-    curYpos = EEPROMReadlong(Y_ADDR);
-  }
+  delay(5);  
+  curYpos = EEPROMReadlong(Y_ADDR);  
   delay(5);
   curZpos = EEPROMReadlong(Z_ADDR);
 
@@ -434,7 +430,7 @@ void returnToZero(){
     Timer1.initialize(240); // set a timer of length 100000 microseconds (or 0.1 sec - or 10Hz => the led will blink 5 times, 5 cycles of on-and-off, per second)
     Timer1.attachInterrupt( timerIsr ); // attach the service routine here
     Timer1.pwm(STEP_PWM_PIN,512,240);
-    if(curXpos == 0 && curZpos == 0 && !engageEnabled){
+    if(curXpos == 0 && curZpos == 0 && !wasEngageEnabled){
       Serial.print("{CPT}");
       Serial.print("\n");       
     }
