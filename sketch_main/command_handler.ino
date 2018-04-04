@@ -339,9 +339,7 @@ byte engUntilThreshold(){
 //    digitalWrite(STEP_PWM_PIN,LOW);
 //    delayMicroseconds(120);  
 
-    
-
-  while(!threshReached){
+  while(!threshReached && !stopTriggered){
       forceVal = read_average_force(5);
       TRACEF(millis());
       TRACEF(",");
@@ -436,7 +434,7 @@ void returnToZero(){
     Timer1.initialize(240); // set a timer of length 100000 microseconds (or 0.1 sec - or 10Hz => the led will blink 5 times, 5 cycles of on-and-off, per second)
     Timer1.attachInterrupt( timerIsr ); // attach the service routine here
     Timer1.pwm(STEP_PWM_PIN,512,240);
-    if(curXpos == 0 && curZpos == 0){
+    if(curXpos == 0 && curZpos == 0 && !engageEnabled){
       Serial.print("{CPT}");
       Serial.print("\n");       
     }
