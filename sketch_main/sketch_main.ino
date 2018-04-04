@@ -2,14 +2,14 @@
 #define NUM_CMDS 7  //used for the commandList -- allows for new commands to be added in the future (comm protocol may need expansion)
 
 #define DEBUG 0      //enables trace statments
-#define ZERO_CALIBRATE 0 //for manually calibrating the 0 position
+#define ZERO_CALIBRATE 0//for manually calibrating the 0 position
 #define DO_BOUNDS_CHECK 1
 
 #define RETURN_TO_ZERO 1 
 #define USING_MODE_SELECT 1
 #define AUTOMATIC_MODE 1
 #define MANUAL_MODE 0
-#define FORCE_TEST 1
+#define FORCE_TEST 0
 #define THRESH_CHECK 1
 
 #if DEBUG 

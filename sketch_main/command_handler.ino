@@ -29,7 +29,7 @@
 #define FORCE_THRESH_MAX  120000
 
 #define FORCE_STEADY        83886
-#define FORCE_ERROR_THRESH  0.02
+#define FORCE_ERROR_THRESH  0.01
 #define UPPER_ERROR (1+FORCE_ERROR_THRESH)
 #define LOWER_ERROR (1-FORCE_ERROR_THRESH)
 #define FORCE_STEADY_UPPER  FORCE_STEADY * UPPER_ERROR
@@ -293,6 +293,7 @@ char handleSTP(){
 char handleRST(){
   TRACEN("handle RST");
   if(RETURN_TO_ZERO){
+    stopTriggered = true;
     returnToZero();
   }    
   int eventResult = 120;
@@ -339,23 +340,25 @@ byte engUntilThreshold(){
       #if THRESH_CHECK
         if(forceVal < FORCE_STEADY_UPPER && forceVal > FORCE_STEADY_LOWER){
           
-        } else if (forceVal < forceProfile[profileIndex]*UPPER_ERROR &&
-                   forceVal > forceProfile[profileIndex]*LOWER_ERROR) {
-          profileIndex++;
-          if(profileIndex == PROFILE_SIZE){
-            //we have reached the end of the profile and are done engagement. return true
-            handleSTP();
-            saveCurPos();
-            threshReached = true;
-            retVal = 100;      
-          }
+        } else if (forceVal < forceProfile[1]*UPPER_ERROR &&
+                   forceVal > forceProfile[1]*LOWER_ERROR) {
+//          profileIndex++;
+//          if(profileIndex == PROFILE_SIZE){
+//            //we have reached the end of the profile and are done engagement. return true
+//            handleSTP();
+//            saveCurPos();
+//            threshReached = true;
+//            retVal = 100;      
+//          }
         } else {
           //break or error - there is no force profile
-          TRACEN("force outside of profile");
-          
-          handleRST();
+          TRACEN("force outside of profile");          
+          handleSTP();
+          //saveCurPos();
           threshReached = true;
-          retVal = 0;        
+          Serial.print("{CPT}");
+          Serial.print("\n");
+          retVal = 100;        
         } 
       #endif
     if(y_pos + y_counter >= Y_BOUND_MAX){
