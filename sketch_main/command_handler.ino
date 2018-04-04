@@ -292,9 +292,11 @@ char handleSTP(){
 
 char handleRST(){
   TRACEN("handle RST");
-  if(RETURN_TO_ZERO){
+  if(!stopTriggered){
     stopTriggered = true;
-    returnToZero();
+    if(RETURN_TO_ZERO){
+      returnToZero();
+    }      
   }    
   int eventResult = 120;
   return eventResult;
@@ -425,6 +427,7 @@ void returnToZero(){
     Timer1.attachInterrupt( timerIsr ); // attach the service routine here
     Timer1.pwm(STEP_PWM_PIN,512,240);
     if(curXpos == 0 && curZpos == 0 && (!wasEngageEnabled || stopTriggered)){
+      TRACEN("ret to zero, only Y is moving");
       if(stopTriggered == true){
         stopTriggered = false;
       }       
