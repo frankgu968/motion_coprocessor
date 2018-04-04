@@ -37,7 +37,7 @@
 #define PROFILE_SIZE 100
 
 #define EEPROM_WRITE_CYCLES 5000
-#define ENGAGE_FORCE_CHECK_DIST 2
+#define ENGAGE_FORCE_CHECK_DIST 0.5
 
 #define STEPS_PER_MM 318.5
 
@@ -327,24 +327,27 @@ byte engUntilThreshold(){
   boolean threshReached = false;
   long forceVal = 0;
   byte retVal = 0;
-    
+  
+  moveMotor('Y', (Y_BOUND_MAX - y_pos)/STEPS_PER_MM);
   while(!threshReached && !stopTriggered){
-    y_pos++;
     
-    digitalWrite(Y_DIR,HIGH);
-    digitalWrite(Y_ENA,LOW);
-    digitalWrite(STEP_PWM_PIN,HIGH);
-    delayMicroseconds(120);
-    digitalWrite(STEP_PWM_PIN,LOW);
-    delayMicroseconds(120);  
     
-    if(y_pos%(long)(STEPS_PER_MM*ENGAGE_FORCE_CHECK_DIST) == 0){  
+//    digitalWrite(Y_DIR,HIGH);
+//    digitalWrite(Y_ENA,LOW);
+//    digitalWrite(STEP_PWM_PIN,HIGH);
+//    delayMicroseconds(120);
+//    digitalWrite(STEP_PWM_PIN,LOW);
+//    delayMicroseconds(120);  
+
+    
+
+  while(!threshReached){
       forceVal = read_average_force(5);
       TRACEF(millis());
       TRACEF(",");
       TRACEFN(forceVal);
       
-      #if !FORCE_TEST
+      #if THRESH_CHECK
         if(forceVal < FORCE_STEADY_UPPER && forceVal > FORCE_STEADY_LOWER){
           
         } else if (forceVal < forceProfile[profileIndex]*UPPER_ERROR &&
@@ -613,9 +616,11 @@ void timerIsr()
     x_dirVec = 0;
     y_dirVec = 0;
     z_dirVec = 0;    
-    
-    Serial.print("{CPT}");
-    Serial.print("\n");
+
+    if(!engageEnabled){
+      Serial.print("{CPT}");
+      Serial.print("\n");
+    }
 
     if(stopTriggered == true){
       stopTriggered = false;
