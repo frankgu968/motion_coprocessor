@@ -329,16 +329,7 @@ byte engUntilThreshold(){
   byte retVal = 0;
   
   moveMotor('Y', (Y_BOUND_MAX - y_pos)/STEPS_PER_MM);
-  while(!threshReached && !stopTriggered){
-    
-    
-//    digitalWrite(Y_DIR,HIGH);
-//    digitalWrite(Y_ENA,LOW);
-//    digitalWrite(STEP_PWM_PIN,HIGH);
-//    delayMicroseconds(120);
-//    digitalWrite(STEP_PWM_PIN,LOW);
-//    delayMicroseconds(120);  
-
+      
   while(!threshReached && !stopTriggered){
       forceVal = read_average_force(5);
       TRACEF(millis());
@@ -367,13 +358,13 @@ byte engUntilThreshold(){
           retVal = 0;        
         } 
       #endif
-    }
-    if(y_pos >= Y_BOUND_MAX){
+    if(y_pos + y_counter >= Y_BOUND_MAX){
       handleSTP();
       threshReached = true;
       retVal = 0;
-    }    
-  }  
+    } 
+  }      
+   
   if(stopTriggered){
     retVal = 100;    
   }
@@ -430,17 +421,25 @@ void returnToZero(){
     Timer1.initialize(240); // set a timer of length 100000 microseconds (or 0.1 sec - or 10Hz => the led will blink 5 times, 5 cycles of on-and-off, per second)
     Timer1.attachInterrupt( timerIsr ); // attach the service routine here
     Timer1.pwm(STEP_PWM_PIN,512,240);
-    if(curXpos == 0 && curZpos == 0 && !wasEngageEnabled){
+    if(curXpos == 0 && curZpos == 0 && (!wasEngageEnabled || stopTriggered)){
+      if(stopTriggered == true){
+        stopTriggered = false;
+      }       
       Serial.print("{CPT}");
-      Serial.print("\n");       
+      Serial.print("\n");            
     }
+    
   }  
   if(curXpos != 0){
     moveMotor('X', (curXpos * -1.0)/STEPS_PER_MM); 
   }  
   if(curZpos != 0){
     moveMotor('Z', (curZpos * -1.0)/STEPS_PER_MM);   
-  } 
+  }
+  if(curZpos == 0 && curYpos == 0 && curZpos == 0){
+    Serial.print("{CPT}");
+    Serial.print("\n"); 
+  }
 }
 
 void saveCurPos(){
