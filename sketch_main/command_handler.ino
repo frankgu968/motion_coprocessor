@@ -358,11 +358,7 @@ byte engUntilThreshold(){
         } else {
           //break or error - there is no force profile
           TRACEN("force outside of profile");          
-          //handleSTP();
-          digitalWrite(Y_ENA,HIGH);
-          enabled_Y = false;
-          EEPROMWritelong(Y_ADDR,y_pos + (y_counter*y_dirVec));
-          //saveCurPos();
+          handleSTP();                          
           threshReached = true;
           engageEnabled = false;
           Serial.print("{CPT}");
@@ -433,6 +429,8 @@ void returnToZero(){
     Timer1.initialize(240); // set a timer of length 100000 microseconds (or 0.1 sec - or 10Hz => the led will blink 5 times, 5 cycles of on-and-off, per second)
     Timer1.attachInterrupt( timerIsr ); // attach the service routine here
     Timer1.pwm(STEP_PWM_PIN,512,240);
+    move_y_Done = true;
+    y_started = false;
     if(curXpos == 0 && curZpos == 0 && (!wasEngageEnabled || stopTriggered)){
       TRACEN("ret to zero, only Y is moving");
       if(stopTriggered == true){
@@ -453,6 +451,7 @@ void returnToZero(){
     Serial.print("{CPT}");
     Serial.print("\n"); 
   }
+  
 }
 
 void saveCurPos(){
@@ -561,6 +560,7 @@ void timerIsr()
   if(x_started == true){
     if(x_done){
       move_x_Done = true;
+      TRACEN("x done");
     }else{
       move_x_Done = false;
     }
@@ -570,7 +570,8 @@ void timerIsr()
 
   if(y_started == true){
     if(y_done){
-      move_y_Done = true;      
+      move_y_Done = true;  
+      TRACEN("y done");    
     } else {
       move_y_Done = false;
     }
@@ -580,29 +581,35 @@ void timerIsr()
 
   if(z_started == true){
     if(z_done){
-      move_z_Done = true;      
+      move_z_Done = true; 
+      TRACEN("z done");     
     } else{
       move_z_Done = false;
     }
+    
   } else {
     move_z_Done = true;
   }
 
   //if all motors are done, then save state and reset enables
+  
   if(move_z_Done && move_y_Done && move_x_Done && (x_started || y_started || z_started)){
-    
-    if(x_dirVec !=0 && x_started && !engageEnabled){
+    TRACEN("in the mem reset");
+    if(x_dirVec !=0 && x_started ){
       delay(5);
+      TRACEN("saving x dist");
       EEPROMWritelong(X_ADDR,x_pos + (x_counter*x_dirVec));
       x_counter = 0;      
     }
     if(y_dirVec != 0 && y_started && !stopTriggered){
       delay(5);
+      TRACEN("saving y dist");
       EEPROMWritelong(Y_ADDR,y_pos + (y_counter*y_dirVec));
       y_counter = 0;
     }
-    if(z_dirVec != 0 && z_started && !engageEnabled){
+    if(z_dirVec != 0 && z_started ){
       delay(5);
+      TRACEN("saving z dist");
       EEPROMWritelong(Z_ADDR,z_pos + (z_counter*z_dirVec));
       z_counter = 0;
     }   
@@ -632,7 +639,7 @@ void timerIsr()
       stopTriggered = false;
     }
     
-  }
+  } 
 }
 
 
