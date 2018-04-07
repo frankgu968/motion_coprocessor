@@ -3,7 +3,7 @@
 
 #define DEBUG 0          //enables trace statments
 #define ZERO_CALIBRATE 0 //for manually calibrating the 0 position
-#define DO_BOUNDS_CHECK 1
+#define DO_BOUNDS_CHECK 0
 
 #define RETURN_TO_ZERO 1 
 #define USING_MODE_SELECT 1
